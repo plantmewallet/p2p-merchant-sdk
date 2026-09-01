@@ -2,12 +2,16 @@
 
 Official JavaScript / TypeScript SDK for the PlantMe Wallet Merchant API.
 
-`v0.3.0-beta.0` ships the REST surface (HMAC-signed access to orders, trades,
+`v0.3.0-beta.2` ships the REST surface (HMAC-signed access to orders, trades,
 wallet, market data, payment methods, webhook configuration, analytics, and
 server-time sampling), the SaaS Platform namespace (`client.platform.users(uid)`)
 for per-end-user wallet, order, trade, KYC, marketplace, and fund-user flows,
 and the revshare reporting surface (`client.platform.revshare`). WebSocket
 streaming is shipped under the `/stream` subpath.
+
+New in `0.3.0-beta.2`: `client.wallet.getTransactions()` reads the movements
+behind a balance, and `client.wallet.verifyTransfer()` confirms a transfer a
+customer claims to have sent. See [docs/wallet-transactions.md](docs/wallet-transactions.md).
 
 ## Install
 
@@ -240,8 +244,8 @@ const { secret } = await client.webhooks.regenerateSecret(); // returned ONCE
 | `client.account`      | `get`                                                        |
 | `client.availability` | `update`                                                     |
 | `client.orders`       | `create`, `list`, `get`, `update`, `cancel`, `listAll`       |
-| `client.trades`       | `get`, `list`, `markPaymentSent`, `confirmPayment`, `release`, `cancel`, `openDispute`, `sendMessage`, `listMessages`, `listAll` |
-| `client.wallet`       | `getBalance`, `getHolds`                                     |
+| `client.trades`       | `get`, `list`, `markPaymentSent`, `confirmPayment`, `release`, `cancel`, `openDispute`, `sendMessage`, `listMessages`, `switchMerchant`, `listAll` |
+| `client.wallet`       | `getBalance`, `getHolds`, `getTransactions`, `verifyTransfer` |
 | `client.market`       | `getBestPrices`, `getActiveAds`, `getReferencePrice`, `getMyRank` |
 | `client.paymentMethods` | `list`                                                     |
 | `client.webhooks`     | `getConfig`, `updateConfig`, `regenerateSecret`, `getLogs`, `getAllowedEvents`, `test` |

@@ -84,6 +84,8 @@ export function normalizeMerchantAccount(value: unknown): MerchantAccount {
   return {
     merchantId: requiredString(raw, 'merchantId', context),
     tier,
+    accountType: requiredString(raw, 'accountType', context) as MerchantAccount['accountType'],
+    apiKeyScope: requiredString(raw, 'apiKeyScope', context) as MerchantAccount['apiKeyScope'],
     status: status as MerchantAccount['status'],
     expressEligible: requiredBoolean(raw, 'expressEligible', context),
     expressAvailable: requiredBoolean(raw, 'expressAvailable', context),

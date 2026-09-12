@@ -191,6 +191,7 @@ describe('merchant-service response contracts', () => {
     const { client } = buildClient([
       {
         merchantId: 'MER-1', tier: 'professional', status: 'active',
+        accountType: 'direct_trader', apiKeyScope: 'self',
         expressEligible: true, expressAvailable: false, kycStatus: 'verified',
         permissions: ['account:read'], createdAt: '2026-08-29T00:00:00.000Z'
       },
@@ -213,6 +214,6 @@ describe('merchant-service response contracts', () => {
 
 describe('runtime metadata', () => {
   it('matches the package release version', () => {
-    expect(SDK_METADATA.version).toBe('0.3.0-beta.0');
+    expect(SDK_METADATA.version).toBe('0.3.0-beta.2');
   });
 });

@@ -196,6 +196,18 @@ export class TradesResource {
   }
 
   /**
+   * Alias for {@link openDispute}. Retained for compatibility with the
+   * merchant API contract and existing integrations.
+   */
+  async dispute(
+    tradeId: string,
+    input: { reason: string; evidence?: string[] },
+    opts: RequestOptions = {}
+  ): Promise<DisputeResponse> {
+    return this.openDispute(tradeId, input, opts);
+  }
+
+  /**
    * Sends a chat message on a trade thread.
    *
    * @param tradeId - Trade identifier.

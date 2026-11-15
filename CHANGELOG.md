@@ -7,6 +7,20 @@ and the package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 The beta line (`0.x`) may still break public surface between minor versions;
 pin `~0.3.0-beta` if you want to opt out of incidental changes.
 
+## [Unreleased]
+
+### Fixed
+
+- `client.platform.revshare.listRewards()`, `listPayouts()`,
+  `listProposals()` and `getConfigHistory()` return the page their signature
+  declares. The service answers each list under the name of what it holds
+  (`rewards`, `payouts`, `proposals`, `versions`), and that object came back
+  as it was, so `items` was undefined and a loop over the page threw. A bare
+  array is read as before. On any other body `hasMore` is true only when the
+  service sends `true`, and a `nextCursor` that is not a string, such as the
+  `null` of the last page, is reported as absent, so a `while (cursor)` walk
+  terminates.
+
 ## [0.3.0-beta.2] - 2026-09-02
 
 ### Added

@@ -53,9 +53,7 @@ export class RevshareResource {
     opts: ListConfigHistoryOptions = {},
     requestOpts: RequestOptions = {}
   ): Promise<PaginatedPlatform<EnterpriseMerchantConfig>> {
-    const raw = await this.http.request<
-      EnterpriseMerchantConfig[] | PaginatedPlatform<EnterpriseMerchantConfig>
-    >(
+    const raw = await this.http.request<unknown>(
       {
         method: 'GET',
         path: `${BASE}/config/history`,
@@ -63,7 +61,7 @@ export class RevshareResource {
       },
       requestOpts
     );
-    return normalizePlatformPage(raw, opts.limit);
+    return normalizePlatformPage<EnterpriseMerchantConfig>(raw, opts.limit, 'versions');
   }
 
   /**
@@ -121,9 +119,7 @@ export class RevshareResource {
     opts: ListProposalsOptions = {},
     requestOpts: RequestOptions = {}
   ): Promise<PaginatedPlatform<ConfigProposal>> {
-    const raw = await this.http.request<
-      ConfigProposal[] | PaginatedPlatform<ConfigProposal>
-    >(
+    const raw = await this.http.request<unknown>(
       {
         method: 'GET',
         path: `${BASE}/config/proposals`,
@@ -135,7 +131,7 @@ export class RevshareResource {
       },
       requestOpts
     );
-    return normalizePlatformPage(raw, opts.limit);
+    return normalizePlatformPage<ConfigProposal>(raw, opts.limit, 'proposals');
   }
 
   /**
@@ -216,9 +212,7 @@ export class RevshareResource {
     // /api/v1/merchant/revshare/earnings/rewards. Keeping the path here
     // aligned with the server mount so SaaS integrators do not have to
     // discover the extra /earnings segment by trial and error.
-    const raw = await this.http.request<
-      RevshareReward[] | PaginatedPlatform<RevshareReward>
-    >(
+    const raw = await this.http.request<unknown>(
       {
         method: 'GET',
         path: `${BASE}/earnings/rewards`,
@@ -232,7 +226,7 @@ export class RevshareResource {
       },
       requestOpts
     );
-    return normalizePlatformPage(raw, opts.limit);
+    return normalizePlatformPage<RevshareReward>(raw, opts.limit, 'rewards');
   }
 
   /**
@@ -246,9 +240,7 @@ export class RevshareResource {
     opts: ListPayoutsOptions = {},
     requestOpts: RequestOptions = {}
   ): Promise<PaginatedPlatform<RevsharePayout>> {
-    const raw = await this.http.request<
-      RevsharePayout[] | PaginatedPlatform<RevsharePayout>
-    >(
+    const raw = await this.http.request<unknown>(
       {
         method: 'GET',
         path: `${BASE}/payouts`,
@@ -262,7 +254,7 @@ export class RevshareResource {
       },
       requestOpts
     );
-    return normalizePlatformPage(raw, opts.limit);
+    return normalizePlatformPage<RevsharePayout>(raw, opts.limit, 'payouts');
   }
 
   /**
@@ -315,14 +307,35 @@ export class RevshareResource {
   }
 }
 
+// The merchant API answers each list under the name of what it holds,
+// for example { rewards, hasMore, nextCursor }.
+type PlatformPageKey = 'versions' | 'proposals' | 'rewards' | 'payouts';
+
+// The body is read as unknown because the service shape is not the SDK page,
+// so every field is checked before it is used.
 function normalizePlatformPage<T>(
-  raw: T[] | PaginatedPlatform<T>,
-  requestedLimit: number | undefined
+  raw: unknown,
+  requestedLimit: number | undefined,
+  key: PlatformPageKey
 ): PaginatedPlatform<T> {
   if (Array.isArray(raw)) {
-    const items = raw;
+    const items = raw as T[];
     const hasMore = requestedLimit !== undefined ? items.length >= requestedLimit : false;
     return { items, hasMore };
   }
-  return raw;
+  const body: Record<string, unknown> =
+    raw !== null && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const named = body[key];
+  const items = Array.isArray(named)
+    ? (named as T[])
+    : Array.isArray(body.items)
+      ? (body.items as T[])
+      : [];
+  return {
+    items,
+    hasMore: body.hasMore === true,
+    // The service sends null on the last page, so only a string is a cursor
+    // and a walk stops on undefined.
+    nextCursor: typeof body.nextCursor === 'string' ? body.nextCursor : undefined
+  };
 }
